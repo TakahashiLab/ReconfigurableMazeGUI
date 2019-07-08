@@ -103,8 +103,7 @@ delete(s);
 clear('s');
 close(handles.figure1);
 
-saveName=['SensorLog_' strrep(strrep(datestr(now), ' ', '_'), ':','-') '.txt'];
-fid=fopen(saveName,'a');
+fid=fopen('tst.txt','a');
 fprintf(fid, handles.string_for_result);
 fclose(fid);
 
@@ -165,35 +164,35 @@ function GetSessionData2( ~, ~, handles, hObject)  %動く
 s = handles.serial;
 %バッファがある場合、有効な識別コードなら、対応する処理をする
 if s.BytesAvailable
-  %識別コードを読み出す
-  id = fread(s,1);
-  %識別コードに対応する処理
-  switch id
+    %識別コードを読み出す
+    id = fread(s,1);
+    %識別コードに対応する処理
+    switch id
     case 'f'
-      %セッション毎の結果報告->トライアル
-      DisplaySessionResult(handles, hObject);
+        %セッション毎の結果報告->トライアル
+        DisplaySessionResult(handles, hObject);
     case 'h'
-      %識別コード'H'のエコーバック
-      %DisplayBufferData(handles);
+        %識別コード'H'のエコーバック
+        %DisplayBufferData(handles);
     case 'i'
-      %正解のセンサ列・現在のセンサ列を受け取る。debug用
-      pause(0.2);
-      t = ['正解のセンサ列：' newline '  '];
-      for i=1:8
-        t = [t num2str( fread(s,1)+0 ) ',']; %#ok<AGROW>
-      end
-      t = [t newline '現在のセンサ列：' newline '  '];
-      for i=1:8
-        t = [t num2str( fread(s,1)+0 ) ',']; %#ok<AGROW>
-      end
-      set(handles.text5, 'String', t);
+        %正解のセンサ列・現在のセンサ列を受け取る。debug用
+        pause(0.2);
+        t = ['正解のセンサ列：' newline '  '];
+        for i=1:8
+            t = [t num2str( fread(s,1)+0 ) ','];
+        end
+        t = [t newline '現在のセンサ列：' newline '  '];
+        for i=1:8
+            t = [t num2str( fread(s,1)+0 ) ','];
+        end
+        set(handles.text5, 'String', t);
     otherwise
-      %不正な識別コード
-      %バッファを空にする
-      while s.BytesAvailable
-        fread(s,1);
-      end
-  end
+        %不正な識別コード
+        %バッファを空にする
+        while s.BytesAvailable
+            fread(s,1);
+        end
+    end
 end
 %--------------------------------------------------------------------------
 % セッションの結果を画面に表示する
@@ -217,19 +216,17 @@ is_success = num2str( fread(s,1)+0 );
 t = [t newline '成否：' is_success newline '成功数：'];
 success_trials = num2str( fread(s,1)+0 );
 t = [t success_trials];
-handles.string_for_result = [get(handles.edit_result, 'String') snsr ' ' is_success ', ' success_trials '; \n'];
+handles.string_for_result = [get(handles.edit_result, 'String') snsr ' ' is_success ', ' success_trials '; '];
 %handles.string_for_result = [handles.string_for_result snsr ' ' is_success ', ' success_trials '; '];
 %guidata(hObject, handles);
 
 %残っているバッファがあれば読み出し
 while s.BytesAvailable
-  t = [t num2str(fread(s,1)) ', ']; %#ok<AGROW>
+    t = [t num2str(fread(s,1)) ', ']; %#ok<AGROW>
 end
 %描画
 set(handles.text2, 'String', t );
 set(handles.edit_result, 'String', handles.string_for_result);
-
-guidata(hObject, handles);
 %--------------------------------------------------------------------------
 
 
